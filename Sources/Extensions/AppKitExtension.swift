@@ -20,7 +20,8 @@ public extension NSTableView {
         using stagedChangeset: StagedChangeset<C>,
         with animation: @autoclosure () -> NSTableView.AnimationOptions,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
-        setData: (C) -> Void
+        setData: (C) -> Void,
+        completion: (() -> Void)? = nil
         ) {
         reload(
             using: stagedChangeset,
@@ -28,7 +29,8 @@ public extension NSTableView {
             insertRowsAnimation: animation(),
             reloadRowsAnimation: animation(),
             interrupt: interrupt,
-            setData: setData
+            setData: setData,
+            completion: completion
         )
     }
 
@@ -53,8 +55,11 @@ public extension NSTableView {
         insertRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
         reloadRowsAnimation: @autoclosure () -> NSTableView.AnimationOptions,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
-        setData: (C) -> Void
+        setData: (C) -> Void,
+        completion: (() -> Void)? = nil
         ) {
+        defer { completion?() }
+
         if case .none = window, let data = stagedChangeset.last?.data {
             setData(data)
             return reloadData()
@@ -115,8 +120,11 @@ public extension NSCollectionView {
     func reload<C>(
         using stagedChangeset: StagedChangeset<C>,
         interrupt: ((Changeset<C>) -> Bool)? = nil,
-        setData: (C) -> Void
+        setData: (C) -> Void,
+        completion: (() -> Void)? = nil
         ) {
+        defer { completion?() }
+
         if case .none = window, let data = stagedChangeset.last?.data {
             setData(data)
             return reloadData()
